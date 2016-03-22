@@ -4,6 +4,6 @@ Pod::Spec.new do |s|
   s.summary      = "A customizable calendar view for iOS."
   s.platform     = :ios, '7.0'
   s.source       = { :git => "https://github.com/zsolt-balint-arobs/Calender", :tag => s.version.to_s }
-  s.source_files  = 'Calender/**/*'
+  s.source_files  = 'Calender/Calender/Tapku/'
   s.requires_arc = true
 end
