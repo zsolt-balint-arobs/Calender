@@ -111,7 +111,7 @@
         if(blockHeight == 12)
             self.titleLabel.font = [UIFont boldSystemFontOfSize:FONT_SIZE-2];
 
-        CGRect titleRect = self.titleLabel.frame;
+		CGRect titleRect = CGRectInset(self.bounds, 5, 5);
         titleRect.origin.y = 0;
         titleRect.size.height = blockHeight;
         self.titleLabel.frame = titleRect;
