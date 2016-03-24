@@ -199,5 +199,12 @@
     _colorType = type;
 }
 
+- (void)setCustomBackgroundColor:(UIColor *)color {
+	self.titleLabel.textColor = [UIColor blackColor];
+	self.locationLabel.textColor = [UIColor blackColor];
+	self.backgroundColor = color;
+	self.edgeView.backgroundColor = [UIColor lightGrayColor];
+	_customBackgroundColor = color;
+}
 
 @end
