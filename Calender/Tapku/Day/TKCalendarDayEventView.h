@@ -74,4 +74,7 @@ typedef NS_ENUM(NSUInteger,TKCalendarEventColor) { // add more colors what you n
 /** This is the custom background color of the event. */
 @property (nonatomic) UIColor *customBackgroundColor;
 
+/** The event item. */
+@property (nonatomic,strong) NSObject *item;
+
 @end
