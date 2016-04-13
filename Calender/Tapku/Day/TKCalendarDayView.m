@@ -183,7 +183,9 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	
 	
 	NSInteger cnt = 0;
-	NSArray *daySymbols = [[NSCalendar currentCalendar] shortWeekdaySymbols];
+	NSMutableArray *daySymbols = [NSMutableArray arrayWithArray:[self.calendar shortWeekdaySymbols]];
+	[daySymbols addObject:[daySymbols lastObject]];
+	[daySymbols removeObjectAtIndex:0];
 	CGFloat wid = CGRectGetWidth([UIScreen mainScreen].bounds);
 	//wid -= 8;
 	
@@ -196,7 +198,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(minX + cnt*(DAY_LABEL_WIDTH+per) , 1, DAY_LABEL_WIDTH, 20)];
 		label.font = [UIFont systemFontOfSize:11];
 		label.text = [str substringToIndex:1];
-		label.textColor = cnt == 0 || cnt == 6 ? WEEKEND_TEXT_COLOR : [UIColor blackColor];
+		label.textColor = cnt == 5 || cnt == 6 ? WEEKEND_TEXT_COLOR : [UIColor blackColor];
 		label.textAlignment = NSTextAlignmentCenter;
 		label.userInteractionEnabled = NO;
 		[self.daysBackgroundView addSubview:label];
@@ -879,7 +881,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	NSArray *labels =  [self _allDayLabels];
 	NSDateComponents *comp = [self.calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear | NSCalendarUnitEra | NSCalendarUnitWeekday fromDate:self.currentDay];
 	NSDateComponents *mutedCom = [self.calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear | NSCalendarUnitEra fromDate:self.currentDay];
-	for(NSInteger cnt= comp.weekday + 6;cnt>=0;cnt--){
+	for(NSInteger cnt= comp.weekday + 5;cnt>=0;cnt--){
 		NSDate *aDate = [self.calendar dateFromComponents:mutedCom];
 		mutedCom = [self.calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear | NSCalendarUnitEra fromDate:aDate];
 		TKDateLabel *label = labels[cnt];
@@ -892,7 +894,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	
 	mutedCom = [self.calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear | NSCalendarUnitEra fromDate:self.currentDay];
 	
-	for(NSInteger cnt= comp.weekday + 6;cnt<labels.count;cnt++){
+	for(NSInteger cnt= comp.weekday + 5;cnt<labels.count;cnt++){
 		
 		NSDate *aDate = [self.calendar dateFromComponents:mutedCom];
 		mutedCom = [self.calendar components:NSCalendarUnitDay | NSCalendarUnitMonth | NSCalendarUnitYear | NSCalendarUnitEra fromDate:aDate];
@@ -1173,7 +1175,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	NSMutableArray *labels = [NSMutableArray arrayWithCapacity:7];
 	for(NSInteger i=0;i<7;i++){
 		TKDateLabel *label = [[TKDateLabel alloc] initWithFrame:CGRectMake(minX+(DAY_LABEL_WIDTH+per)*i, 16, DAY_LABEL_WIDTH, DAY_LABEL_WIDTH)];
-		label.weekend = i % 6 == 0;
+		label.weekend = i % 7 == 5 || i % 7 == 6;
 		//label.backgroundColor = [UIColor redColor];
 		[self addSubviewToBack:label];
 		[labels addObject:label];
