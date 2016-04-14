@@ -186,7 +186,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	NSMutableArray *daySymbols = [NSMutableArray arrayWithArray:[self.calendar shortWeekdaySymbols]];
 	[daySymbols addObject:[daySymbols lastObject]];
 	[daySymbols removeObjectAtIndex:0];
-	CGFloat wid = CGRectGetWidth([UIScreen mainScreen].bounds);
+	CGFloat wid = CGRectGetWidth(self.bounds);
 	//wid -= 8;
 	
 	//NSInteger per = CGFrameGetWidth(self) - (DAY_LABEL_WIDTH *7);
@@ -931,7 +931,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 - (UILabel *) monthYearLabel{
 	if(_monthYearLabel) return _monthYearLabel;
 	
-	_monthYearLabel = [[UILabel alloc] initWithFrame:CGRectInset(CGRectMake(0, TOP_BAR_HEIGHT - 24 - 6, CGRectGetWidth([UIScreen mainScreen].bounds), 24), 40, 0)];
+	_monthYearLabel = [[UILabel alloc] initWithFrame:CGRectInset(CGRectMake(0, TOP_BAR_HEIGHT - 24 - 6, CGRectGetWidth(self.bounds), 24), 40, 0)];
 	_monthYearLabel.textAlignment = NSTextAlignmentCenter;
 	_monthYearLabel.backgroundColor = [UIColor clearColor];
 	_monthYearLabel.font = [UIFont systemFontOfSize:16.0f];
@@ -943,7 +943,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	if(_daysBackgroundView) return _daysBackgroundView;
 		
     //changes in frame for ipad
-    _daysBackgroundView = [[UIView alloc] initWithFrame:CGRectMake(0, 0,CGRectGetWidth([UIScreen mainScreen].bounds), TOP_BAR_HEIGHT)];
+    _daysBackgroundView = [[UIView alloc] initWithFrame:CGRectMake(0, 0,CGRectGetWidth(self.bounds), TOP_BAR_HEIGHT)];
 	_daysBackgroundView.backgroundColor = [UIColor colorWithHex:0xf7f7f7];
 	_daysBackgroundView.layer.shadowColor = [UIColor blackColor].CGColor;
 	_daysBackgroundView.layer.shadowOffset = CGSizeZero;
@@ -1012,7 +1012,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 }
 - (UIScrollView*) daysScrollView{
 	if(_daysScrollView) return _daysScrollView;
-	_daysScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth([UIScreen mainScreen].bounds), CGRectGetMinY(self.monthYearLabel.frame))];
+	_daysScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.bounds), CGRectGetMinY(self.monthYearLabel.frame))];
 	_daysScrollView.pagingEnabled = YES;
 	_daysScrollView.delegate = self;
 	_daysScrollView.contentSize = CGSizeMake(CGRectGetWidth(self.daysScrollView.frame)*3.0, 0);
