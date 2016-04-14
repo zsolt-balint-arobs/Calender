@@ -311,8 +311,8 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	_monthYearLabel.frame = CGRectInset(CGRectMake(0, TOP_BAR_HEIGHT - 24 - 6, CGRectGetWidth(self.bounds), 24), 40, 0);
 
 	// Pages frame fix
-	self.horizontalScrollView.frame = CGRectInset(CGRectMake(0, TOP_BAR_HEIGHT, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame) - TOP_BAR_HEIGHT), -HORIZONTAL_PAD, 0);
 	CGFloat w = CGRectGetWidth([self.pages[1] frame]);
+	self.horizontalScrollView.frame = CGRectInset(CGRectMake(0, TOP_BAR_HEIGHT, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame) - TOP_BAR_HEIGHT), -HORIZONTAL_PAD, 0);
 	CGFloat scrollWidth = CGRectGetWidth(self.horizontalScrollView.frame);
 	self.horizontalScrollView.contentSize = CGSizeMake(scrollWidth*3.0, 0);
 	self.horizontalScrollView.contentOffset = CGPointMake(scrollWidth, 0);
