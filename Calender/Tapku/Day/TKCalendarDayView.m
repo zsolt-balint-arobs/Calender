@@ -91,6 +91,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 @property (nonatomic,strong) NSMutableArray *weekdayPages;
 @property (nonatomic,strong) UIScrollView *daysScrollView;
 
+@property (nonatomic,strong) UIView *allDayEventsContainer;
 @property (nonatomic,strong) NSDate *currentDay;
 @property (nonatomic,strong) NSMutableArray *eventGraveYard;
 @property (nonatomic,strong) UILabel *monthYearLabel;
@@ -146,6 +147,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	self.weekdayPages = [NSMutableArray arrayWithCapacity:3];
 	[self addSubview:self.horizontalScrollView];
 
+	[self.horizontalScrollView addSubview:self.allDayEventsContainer];
 
 	info.day -= 1;
 
@@ -155,7 +157,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 
 		CGRect r = CGRectInset(self.horizontalScrollView.bounds, HORIZONTAL_PAD, 0);
 		r.origin.x = CGRectGetWidth(self.horizontalScrollView.frame) * i + HORIZONTAL_PAD;
-		r.origin.y = 0;
+		r.origin.y = self.allDayEventsContainer.frame.size.height;
 
 		CGRect rr = r;
 		rr.origin.x = 0;
@@ -373,6 +375,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	if(self.delegate && [self.delegate respondsToSelector:@selector(calendarDayTimelineView:didMoveToDate:)])
 		[self.delegate calendarDayTimelineView:self didMoveToDate:self.currentDay];
 
+
 	self.indexOfCurrentDay = nowPage > 1 ? self.indexOfCurrentDay+1 : self.indexOfCurrentDay-1;
 
 
@@ -537,7 +540,8 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	[timeline setNeedsDisplay];
 
 	if(!self.dataSource) return;
-	timeline.events = [NSMutableArray arrayWithArray:[self.dataSource calendarDayTimelineView:self eventsForDate:timeline.date]];
+
+	timeline.events = [NSMutableArray arrayWithArray:[[self.dataSource calendarDayTimelineView:self eventsForDate:timeline.date] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"allDay == 0"]]];
 
 
 	[timeline.events sortUsingComparator:^NSComparisonResult(TKCalendarDayEventView *obj1, TKCalendarDayEventView *obj2){
@@ -547,9 +551,47 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	[self _realignEventsAtIndex:index];
 	if(self.nowLineView.superview == sv)
 		[sv bringSubviewToFront:self.nowLineView];
-
-
 }
+
+- (void) addAllDayEventsWithPageIndex:(NSInteger)index {
+	TKTimelineView *timeLineView = [self _timelineAtIndex:index];
+
+	NSArray *allDayEvents = [[self.dataSource calendarDayTimelineView:self eventsForDate:timeLineView.date] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"allDay == 1"]];
+	if (allDayEvents.count == 0) {
+		[self resetAllDayEventsContainer];
+		return;
+	}
+
+	CGRect frame = CGRectMake(timeLineView.superview.frame.origin.x + HORIZONTAL_PAD, 0, CGRectGetWidth(self.bounds), allDayEvents.count * 20);
+	self.allDayEventsContainer.frame = frame;
+
+	frame = timeLineView.superview.frame;
+	frame.origin.y = self.allDayEventsContainer.frame.size.height;
+	timeLineView.superview.frame = frame;
+
+	frame = _nowLineView.frame;
+	frame.origin.y = self.nowLineView.frame.origin.y + (allDayEvents.count * 20);
+	_nowLineView.frame = frame;
+
+	NSInteger i = 0;
+	for (TKCalendarDayView *dayView in allDayEvents) {
+		UILabel *allDayLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, i * 20, 50, 20)];
+		allDayLabel.text = @"all-day";
+		allDayLabel.font = [UIFont boldSystemFontOfSize:11];
+		allDayLabel.textAlignment = NSTextAlignmentCenter;
+		[self.allDayEventsContainer addSubview:allDayLabel];
+
+		dayView.frame = CGRectMake(100, i * 20, self.allDayEventsContainer.frame.size.width, 20);
+		[self.allDayEventsContainer addSubview:dayView];
+		i++;
+	}
+}
+
+- (void)resetAllDayEventsContainer {
+	[[_allDayEventsContainer subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+	_allDayEventsContainer.frame = CGRectMake(self.horizontalScrollView.bounds.size.width + HORIZONTAL_PAD, 0, CGRectGetWidth(self.bounds), 0);
+}
+
 - (void) _realignEventsAtIndex:(NSInteger)index{
 
 	UIScrollView *sv = self.pages[index];
@@ -659,6 +701,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		timeline.startY = topOrigin;
 	if(sv == self.nowLineView.superview)
 		[sv bringSubviewToFront:self.nowLineView];
+	[self.horizontalScrollView bringSubviewToFront:self.allDayEventsContainer];
 
 }
 
@@ -740,6 +783,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		if(self.delegate && [self.delegate respondsToSelector:@selector(calendarDayTimelineView:didMoveToDate:)])
 			[self.delegate calendarDayTimelineView:self didMoveToDate:self.currentDay];
 
+		[self addAllDayEventsWithPageIndex:1];
 
 		[UIView transitionWithView:self.daysScrollView.subviews.firstObject duration:0.3 options:UIViewAnimationOptionTransitionCrossDissolve animations:^{
 			[self _updateSelectedWeekdayAtIndex:self.indexOfCurrentDay+7];
@@ -830,7 +874,6 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		i++;
 	}
 
-
 }
 - (void) didTapWeekdayLabel:(UITapGestureRecognizer*)sender{
 
@@ -918,6 +961,8 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 
 		if(self.delegate && [self.delegate respondsToSelector:@selector(calendarDayTimelineView:didMoveToDate:)])
 			[self.delegate calendarDayTimelineView:self didMoveToDate:self.currentDay];
+
+		[self addAllDayEventsWithPageIndex:1];
 	}];
 
 
@@ -1069,7 +1114,14 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	_daysScrollView.showsHorizontalScrollIndicator = NO;
 	return _daysScrollView;
 }
-
+- (UIView*) allDayEventsContainer{
+	if(_allDayEventsContainer) {
+		return _allDayEventsContainer;
+	}
+	_allDayEventsContainer = [[UIView alloc] initWithFrame:CGRectMake(self.horizontalScrollView.bounds.size.width + HORIZONTAL_PAD, 0, CGRectGetWidth(self.bounds), 0)];
+	_allDayEventsContainer.backgroundColor = [UIColor whiteColor];
+	return _allDayEventsContainer;
+}
 @end
 
 
@@ -1331,7 +1383,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
 	[dateFormatter setTimeStyle:NSDateFormatterShortStyle];
 	self.timeLabel.text = [dateFormatter stringFromDate:[NSDate date]];
-
+	
 }
 
 - (void) tintColorDidChange{
