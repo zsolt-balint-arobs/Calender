@@ -354,11 +354,11 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 
 	self.currentDay = [self _timelineAtIndex:1].date;
 
+
 	NSDateComponents *info = [self.currentDay dateComponentsWithTimeZone:self.calendar.timeZone];
 	info.day += nowPage < 1 ? -1 : 1;
 	[self _timelineWithScrollView:needsUpdating].date = [NSDate dateWithDateComponents:info];
 	[self _updateDateLabel];
-
 
 	NSInteger i = 0;
 	for(UIScrollView *sv in self.pages){
@@ -367,6 +367,8 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		sv.frame = r;
 		i++;
 	}
+
+	[self addAllDayEventsWithPageIndex:1];
 
 	self.horizontalScrollView.contentOffset = CGPointMake(CGRectGetWidth(self.horizontalScrollView.frame), 0);
 	needsUpdating.contentOffset = CGPointZero;
@@ -395,16 +397,11 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 
 	}
 
-
-
 	[UIView transitionWithView:self.daysScrollView.subviews.firstObject duration:0.3 options:UIViewAnimationOptionTransitionCrossDissolve animations:^{
 		[self _updateSelectedWeekdayAtIndex:self.indexOfCurrentDay+7];
 	}completion:nil];
 
 	[self _scrollToTopEvent:animated];
-
-	[self addAllDayEventsWithPageIndex:1];
-
 }
 - (void) _scrollToTopEvent:(BOOL)animated{
 	UIScrollView *sv = self.pages[1];
@@ -768,10 +765,10 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		((UIScrollView*)self.pages[2]).contentOffset = CGPointZero;
 		[self _refreshDataWithPageAtIndex:0];
 		[self _refreshDataWithPageAtIndex:2];
+		[self addAllDayEventsWithPageIndex:1];
 
 		needsUpdating.contentOffset = CGPointZero;
 		[self _refreshDataWithPageAtIndex:updateIndex];
-
 
 		if(self.delegate && [self.delegate respondsToSelector:@selector(calendarDayTimelineView:didMoveToDate:)])
 			[self.delegate calendarDayTimelineView:self didMoveToDate:self.currentDay];
@@ -781,8 +778,6 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 
 		if(self.delegate && [self.delegate respondsToSelector:@selector(calendarDayTimelineView:didMoveToDate:)])
 			[self.delegate calendarDayTimelineView:self didMoveToDate:self.currentDay];
-
-		[self addAllDayEventsWithPageIndex:1];
 
 		[UIView transitionWithView:self.daysScrollView.subviews.firstObject duration:0.3 options:UIViewAnimationOptionTransitionCrossDissolve animations:^{
 			[self _updateSelectedWeekdayAtIndex:self.indexOfCurrentDay+7];
@@ -945,6 +940,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		((UIScrollView*)self.pages[2]).contentOffset = CGPointZero;
 		[self _refreshDataWithPageAtIndex:0];
 		[self _refreshDataWithPageAtIndex:2];
+		[self addAllDayEventsWithPageIndex:1];
 
 		needsUpdating.contentOffset = CGPointZero;
 		[self _refreshDataWithPageAtIndex:updateIndex];
@@ -961,7 +957,6 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		if(self.delegate && [self.delegate respondsToSelector:@selector(calendarDayTimelineView:didMoveToDate:)])
 			[self.delegate calendarDayTimelineView:self didMoveToDate:self.currentDay];
 
-		[self addAllDayEventsWithPageIndex:1];
 	}];
 
 
