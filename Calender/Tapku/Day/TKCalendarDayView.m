@@ -401,10 +401,9 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		[self _updateSelectedWeekdayAtIndex:self.indexOfCurrentDay+7];
 	}completion:nil];
 
-
-
-
 	[self _scrollToTopEvent:animated];
+
+	[self addAllDayEventsWithPageIndex:1];
 
 }
 - (void) _scrollToTopEvent:(BOOL)animated{
