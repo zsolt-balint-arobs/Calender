@@ -580,7 +580,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		allDayLabel.textAlignment = NSTextAlignmentCenter;
 		[self.allDayEventsContainer addSubview:allDayLabel];
 
-		dayView.frame = CGRectMake(100, i * 20, self.allDayEventsContainer.frame.size.width, 20);
+		dayView.frame = CGRectMake(50, i * 20, self.allDayEventsContainer.frame.size.width - 62, 20);
 		[self.allDayEventsContainer addSubview:dayView];
 		i++;
 	}
