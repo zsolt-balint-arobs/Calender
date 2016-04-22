@@ -51,8 +51,7 @@
 
 @property (nonatomic,strong) NSCalendar *calendar;
 
-
-
+@property (nonatomic,strong) NSLocale *locale;
 
 @property (nonatomic,strong) UIView *daysBackgroundView;
 

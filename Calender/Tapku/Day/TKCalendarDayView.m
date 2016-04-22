@@ -74,6 +74,9 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 @property (nonatomic,strong) UIColor *hourColor;
 @property (nonatomic,assign) BOOL is24hClock;
 @property (nonatomic,assign) BOOL isToday;
+@property (nonatomic,strong) NSLocale *locale;
+
+- (void)refreshTimes;
 @end
 
 @interface TKWeekdaysView : UIView
@@ -99,7 +102,6 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 @property (nonatomic,assign) NSInteger indexOfCurrentDay;
 
 @property (nonatomic,strong) NSMutableArray *weekDayViews;
-
 @end
 
 
@@ -139,6 +141,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 
 	self.formatter = [[NSDateFormatter alloc] init];
 	self.formatter.timeZone = self.calendar.timeZone;
+	self.formatter.locale = self.locale;
 
 	self.eventGraveYard = [NSMutableArray array];
 	self.backgroundColor = [UIColor whiteColor];
@@ -172,6 +175,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		[self.horizontalScrollView addSubview:sv];
 
 		TKTimelineView *timelineView = [[TKTimelineView alloc] initWithFrame:sv.bounds];
+		timelineView.locale = self.locale;
 		timelineView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		[sv addSubview:timelineView];
 		timelineView.date = date;
@@ -187,7 +191,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 
 
 	NSInteger cnt = 0;
-	NSMutableArray *daySymbols = [NSMutableArray arrayWithArray:[self.calendar shortWeekdaySymbols]];
+	NSMutableArray *daySymbols = [NSMutableArray arrayWithArray:[self.formatter weekdaySymbols]];
 	[daySymbols addObject:[daySymbols lastObject]];
 	[daySymbols removeObjectAtIndex:0];
 	CGFloat wid = CGRectGetWidth(self.bounds);
@@ -236,6 +240,25 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 
 }
 
+#pragma mark Getters and setters
+- (void)setLocale:(NSLocale *)locale {
+	if (_locale != locale) {
+		_locale = locale;
+		self.formatter.locale = self.locale;
+
+		NSInteger cnt = 0;
+		NSMutableArray *daySymbols = [NSMutableArray arrayWithArray:[self.formatter weekdaySymbols]];
+		[daySymbols addObject:[daySymbols lastObject]];
+		[daySymbols removeObjectAtIndex:0];
+
+		for (UILabel* label in self.weekDayViews) {
+			label.text = [daySymbols[cnt] substringToIndex:1].capitalizedString;
+			cnt++;
+		}
+
+		[self reloadData];
+	}
+}
 
 #pragma mark Button Actions
 - (void) nextDay:(id)sender {
@@ -437,7 +460,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 - (void) _updateDateLabel{
 	self.formatter.dateFormat = @"EEEE MMMM d, yyyy";
 	self.formatter.timeZone = self.calendar.timeZone;
-	self.monthYearLabel.text = [self.formatter stringFromDate:self.currentDay];
+	self.monthYearLabel.text = [self.formatter stringFromDate:self.currentDay].capitalizedString;
 }
 
 
@@ -500,7 +523,9 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	r.origin.x = CGRectGetWidth(self.horizontalScrollView.frame) * index + HORIZONTAL_PAD;
 	sv.frame = r;
 
-
+	timeline.locale = self.locale;
+	[timeline refreshTimes];
+	[timeline setNeedsDisplay];
 
 	timeline.startY = VERTICAL_INSET;
 
@@ -1171,6 +1196,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 
 		NSDate *now = [NSDate date];
 		NSDateFormatter *form = [[NSDateFormatter alloc] init];
+		form.locale = self.locale;
 		form.dateFormat = @"H";
 		NSInteger hour = [[form stringFromDate:now] integerValue];
 		form.dateFormat = @"m";
@@ -1248,10 +1274,26 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	if (self.is24hClock)
 		_times = @[@"00:00",@"01:00",@"02:00",@"03:00",@"04:00",@"05:00",@"06:00",@"07:00",@"08:00",@"09:00",@"10:00",@"11:00",@"12:00",
 				   @"13:00",@"14:00",@"15:00",@"16:00",@"17:00",@"18:00",@"19:00",@"20:00",@"21:00",@"22:00",@"23:00",@""];
-	else
+	else {
+		NSString *noon = @"Noon";
+		if ([self.locale isEqual:[NSLocale localeWithLocaleIdentifier:@"fr"]]) {
+			noon = @"Le midi";
+		}
 		_times = @[@"12 AM",@"1 AM",@"2 AM",@"3 AM",@"4 AM",@"5 AM",@"6 AM",@"7 AM",@"8 AM",@"9 AM",@"10 AM",@"11 AM",
-				   @"Noon",@"1 PM",@"2 PM",@"3 PM",@"4 PM",@"5 PM",@"6 PM",@"7 PM",@"8 PM",@"9 PM",@"10 PM",@"11 PM",@"12 AM"];
+				   noon,@"1 PM",@"2 PM",@"3 PM",@"4 PM",@"5 PM",@"6 PM",@"7 PM",@"8 PM",@"9 PM",@"10 PM",@"11 PM",@"12 AM"];
+	}
 	return _times;
+}
+
+- (void)refreshTimes {
+	if (!self.is24hClock) {
+		NSString *noon = @"Noon";
+		if ([self.locale isEqual:[NSLocale localeWithLocaleIdentifier:@"fr"]]) {
+			noon = @"Le midi";
+		}
+		_times = @[@"12 AM",@"1 AM",@"2 AM",@"3 AM",@"4 AM",@"5 AM",@"6 AM",@"7 AM",@"8 AM",@"9 AM",@"10 AM",@"11 AM",
+				   noon,@"1 PM",@"2 PM",@"3 PM",@"4 PM",@"5 PM",@"6 PM",@"7 PM",@"8 PM",@"9 PM",@"10 PM",@"11 PM",@"12 AM"];
+	}
 }
 
 @end
