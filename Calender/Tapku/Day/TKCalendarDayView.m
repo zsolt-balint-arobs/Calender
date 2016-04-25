@@ -248,7 +248,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 
 		NSInteger cnt = 0;
 		NSMutableArray *daySymbols = [NSMutableArray arrayWithArray:[self.formatter weekdaySymbols]];
-		[daySymbols addObject:[daySymbols lastObject]];
+		[daySymbols addObject:[daySymbols firstObject]];
 		[daySymbols removeObjectAtIndex:0];
 
 		for (UILabel* label in self.weekDayViews) {
