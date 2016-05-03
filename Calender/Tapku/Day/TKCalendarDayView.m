@@ -75,6 +75,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 @property (nonatomic,assign) BOOL is24hClock;
 @property (nonatomic,assign) BOOL isToday;
 @property (nonatomic,strong) NSLocale *locale;
+@property (nonatomic,strong) NSString *noonString;
 
 - (void)refreshTimes;
 @end
@@ -176,6 +177,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 
 		TKTimelineView *timelineView = [[TKTimelineView alloc] initWithFrame:sv.bounds];
 		timelineView.locale = self.locale;
+		timelineView.noonString = self.noonString;
 		timelineView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		[sv addSubview:timelineView];
 		timelineView.date = date;
@@ -245,7 +247,6 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	if (_locale != locale) {
 		_locale = locale;
 		self.formatter.locale = self.locale;
-
 		NSInteger cnt = 0;
 		NSMutableArray *daySymbols = [NSMutableArray arrayWithArray:[self.formatter weekdaySymbols]];
 		[daySymbols addObject:[daySymbols firstObject]];
@@ -524,6 +525,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	sv.frame = r;
 
 	timeline.locale = self.locale;
+	timeline.noonString = self.noonString;
 	[timeline refreshTimes];
 	[timeline setNeedsDisplay];
 
@@ -1275,25 +1277,36 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		_times = @[@"00:00",@"01:00",@"02:00",@"03:00",@"04:00",@"05:00",@"06:00",@"07:00",@"08:00",@"09:00",@"10:00",@"11:00",@"12:00",
 				   @"13:00",@"14:00",@"15:00",@"16:00",@"17:00",@"18:00",@"19:00",@"20:00",@"21:00",@"22:00",@"23:00",@""];
 	else {
-		NSString *noon = @"Noon";
-		if ([self.locale isEqual:[NSLocale localeWithLocaleIdentifier:@"fr"]]) {
-			noon = @"Le midi";
-		}
-		_times = @[@"12 AM",@"1 AM",@"2 AM",@"3 AM",@"4 AM",@"5 AM",@"6 AM",@"7 AM",@"8 AM",@"9 AM",@"10 AM",@"11 AM",
-				   noon,@"1 PM",@"2 PM",@"3 PM",@"4 PM",@"5 PM",@"6 PM",@"7 PM",@"8 PM",@"9 PM",@"10 PM",@"11 PM",@"12 AM"];
+		_times = [self setupTimes];
 	}
 	return _times;
 }
 
 - (void)refreshTimes {
 	if (!self.is24hClock) {
-		NSString *noon = @"Noon";
-		if ([self.locale isEqual:[NSLocale localeWithLocaleIdentifier:@"fr"]]) {
-			noon = @"Le midi";
-		}
-		_times = @[@"12 AM",@"1 AM",@"2 AM",@"3 AM",@"4 AM",@"5 AM",@"6 AM",@"7 AM",@"8 AM",@"9 AM",@"10 AM",@"11 AM",
-				   noon,@"1 PM",@"2 PM",@"3 PM",@"4 PM",@"5 PM",@"6 PM",@"7 PM",@"8 PM",@"9 PM",@"10 PM",@"11 PM",@"12 AM"];
+		_times = [self setupTimes];
 	}
+}
+
+- (NSArray *)setupTimes {
+	NSDate *date = [[NSCalendar currentCalendar] startOfDayForDate:[NSDate date]];
+	NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+	dateFormatter.dateFormat = @"hh a";
+	dateFormatter.locale = self.locale;
+	NSMutableArray *times = [[NSMutableArray alloc] init];
+	for (int i = 0; i < 25; i++) {
+		if (i != 13) {
+			[times addObject:[dateFormatter stringFromDate:date]];
+			date = [date dateByAddingTimeInterval:3600];
+		} else {
+			if (self.noonString) {
+				[times addObject:self.noonString];
+			} else {
+				[times addObject:@"Noon"];
+			}
+		}
+	}
+	return times;
 }
 
 @end
