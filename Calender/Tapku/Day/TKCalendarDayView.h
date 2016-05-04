@@ -37,6 +37,7 @@
 #pragma mark - TKNowView
 @interface TKNowView : UIView
 @property (nonatomic,strong) UILabel *timeLabel;
+@property (nonatomic,strong) NSLocale *locale;
 - (void) updateTime;
 @end
 
