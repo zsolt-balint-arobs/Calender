@@ -136,6 +136,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 - (void) _setupView{
 
 	self.nowLineView = [[TKNowView alloc] init];
+	self.nowLineView.locale = self.locale;
 
 	NSDateComponents *info = [[NSDate date] dateComponentsWithTimeZone:self.calendar.timeZone];
 	info.hour = info.minute = info.second = 0;
@@ -247,6 +248,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	if (_locale != locale) {
 		_locale = locale;
 		self.formatter.locale = self.locale;
+		self.nowLineView.locale = self.locale;
 		NSInteger cnt = 0;
 		NSMutableArray *daySymbols = [NSMutableArray arrayWithArray:[self.formatter weekdaySymbols]];
 		[daySymbols addObject:[daySymbols firstObject]];
@@ -1295,7 +1297,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	dateFormatter.locale = self.locale;
 	NSMutableArray *times = [[NSMutableArray alloc] init];
 	for (int i = 0; i < 25; i++) {
-		if (i != 13) {
+		if (i != 12) {
 			[times addObject:[dateFormatter stringFromDate:date]];
 			date = [date dateByAddingTimeInterval:3600];
 		} else {
@@ -1304,6 +1306,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 			} else {
 				[times addObject:@"Noon"];
 			}
+			date = [date dateByAddingTimeInterval:3600];
 		}
 	}
 	return times;
@@ -1430,7 +1433,8 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 
 - (void) updateTime{
 	NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-	[dateFormatter setTimeStyle:NSDateFormatterShortStyle];
+	dateFormatter.dateFormat = @"h:mm a";
+	dateFormatter.locale = self.locale;
 	self.timeLabel.text = [dateFormatter stringFromDate:[NSDate date]];
 	
 }
