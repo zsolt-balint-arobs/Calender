@@ -62,6 +62,8 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 @property (nonatomic,assign) BOOL today;
 @property (nonatomic,assign) BOOL selected;
 @property (nonatomic,assign) BOOL weekend;
+@property (nonatomic,assign) BOOL hasEvents;
+@property (nonatomic, readonly) CAShapeLayer *eventCircleLayer;
 @end
 
 
@@ -843,6 +845,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 			label.date = aDate;
 			label.today = [aDate isTodayWithTimeZone:self.calendar.timeZone];
 			label.selected = [aDate isSameDay:self.currentDay timeZone:self.calendar.timeZone];
+			label.hasEvents = [self.dataSource calendarDayTimelineView:self eventsForDate:aDate].count > 0;
 			mutedCom.day++;
 
 		}
@@ -868,6 +871,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 			label.date = aDate;
 			label.today = [aDate isTodayWithTimeZone:self.calendar.timeZone];
 			label.selected = [aDate isSameDay:self.currentDay timeZone:self.calendar.timeZone];
+			label.hasEvents = [self.dataSource calendarDayTimelineView:self eventsForDate:aDate].count > 0;
 			mutedCom.day --;
 
 		}
@@ -1006,6 +1010,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		label.date = aDate;
 		label.today = [aDate isTodayWithTimeZone:self.calendar.timeZone];
 		label.selected = [aDate isSameDay:self.currentDay timeZone:self.calendar.timeZone];
+		label.hasEvents = [self.dataSource calendarDayTimelineView:self eventsForDate:aDate].count > 0;
 		mutedCom.day --;
 	}
 
@@ -1020,6 +1025,7 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		label.date = aDate;
 		label.today = [aDate isTodayWithTimeZone:self.calendar.timeZone];
 		label.selected = [aDate isSameDay:self.currentDay timeZone:self.calendar.timeZone];
+		label.hasEvents = [self.dataSource calendarDayTimelineView:self eventsForDate:aDate].count > 0;
 		mutedCom.day ++;
 
 	}
@@ -1351,6 +1357,10 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 	self.textAlignment = NSTextAlignmentCenter;
 	self.layer.cornerRadius = DAY_LABEL_WIDTH / 2.0f;
 	self.clipsToBounds = YES;
+	_eventCircleLayer = [CAShapeLayer layer];
+	[_eventCircleLayer setPath:[[UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)] CGPath]];
+	[_eventCircleLayer setFillColor:[[UIColor clearColor] CGColor]];
+	[[self layer] addSublayer:_eventCircleLayer];
 	[self _updateLabelColorState];
 	return self;
 }
@@ -1372,6 +1382,11 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 		self.backgroundColor = [UIColor clearColor];
 		self.font = [UIFont systemFontOfSize:DAY_FONT_SIZE];
 	}
+	if (self.hasEvents) {
+		[_eventCircleLayer setStrokeColor:self.today ? self.tintColor.CGColor : [UIColor blackColor].CGColor];
+	} else {
+		[_eventCircleLayer setStrokeColor:[UIColor clearColor].CGColor];
+	}
 	self.tag = self.today ? 1 : 0;
 }
 
@@ -1388,6 +1403,12 @@ static CGFloat const kDashedLinesLength[]   = {4.0f, 2.0f};
 }
 - (void) setWeekend:(BOOL)weekend{
 	_weekend = weekend;
+	[self _updateLabelColorState];
+}
+
+- (void) setHasEvents:(BOOL)hasEvents {
+	if(_hasEvents == hasEvents) return;
+	_hasEvents = hasEvents;
 	[self _updateLabelColorState];
 }
 
