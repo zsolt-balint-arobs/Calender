@@ -6,4 +6,6 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/zsolt-balint-arobs/Calender", :tag => s.version.to_s }
   s.source_files  = 'Calender/Tapku/**/*'
   s.requires_arc = true
+  s.authors = { 'dev' }
+  s.homepage = 'https://github.com/zsolt-balint-arobs/Calender'
 end
