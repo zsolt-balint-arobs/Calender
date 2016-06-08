@@ -6,6 +6,6 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/zsolt-balint-arobs/Calender", :tag => s.version.to_s }
   s.source_files  = 'Calender/Tapku/**/*'
   s.requires_arc = true
-  s.authors = { 'Alamofire Software Foundation' => 'info@alamofire.org' }
-  s.homepage = 'https://github.com/Alamofire/Alamofire'
+  s.authors = { 'CalendarDay' => 'email' }
+  s.homepage = 'https://github.com/zsolt-balint-arobs/Calender'
  end
